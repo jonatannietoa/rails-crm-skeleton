@@ -8,7 +8,10 @@ with CQRS**, mirroring the NestJS bounded-context layout: `domain` → `applicat
 
 ```
 app/
-  controllers/                       # framework entrypoints (health, base)
+  controllers/
+    health_controller.rb             # framework entrypoints (health, base)
+    <context>/                       # HTTP adapter per context (Rails convention)
+      <context>_controller.rb        # thin: params -> handler -> read model
   modules/
     shared/                          # shared kernel used by every context
       domain/
@@ -22,24 +25,31 @@ app/
       application/                   # use cases: commands, queries, read models
         commands/
         queries/
-      infrastructure/                # adapters: http controllers, persistence
-        http/
+      infrastructure/                # non-HTTP adapters
         persistence/                 # ActiveRecord records, mappers, repositories
       container.rb                   # dependency wiring (the NestJS "module")
 ```
 
+The HTTP controller is the one adapter kept in `app/controllers` instead of
+inside the context folder: it is the framework's entrypoint, so Rails routing,
+generators and test helpers expect it there. Everything else about the context
+(domain, use cases, persistence) stays colocated under `app/modules/<context>`.
+
 ### Zeitwerk namespacing
 
-`app/modules` is an autoload root, so the folder path *is* the namespace:
-`app/modules/customers/domain/customer.rb` defines `Customers::Domain::Customer`.
+Both `app/controllers` and `app/modules` are autoload roots, and the folder path
+*is* the namespace. Zeitwerk **merges** the `<context>` namespace across roots, so
+`app/controllers/customers/customers_controller.rb` defines
+`Customers::CustomersController` and `app/modules/customers/domain/customer.rb`
+defines `Customers::Domain::Customer` — one `Customers::` namespace, two roots.
 
 ### The dependency rule
 
 - `domain` depends on nothing but the shared kernel — no Rails, no ActiveRecord.
 - `application` orchestrates the domain and depends on **ports** (interfaces),
   never on concrete adapters.
-- `infrastructure` implements the ports (ActiveRecord repository, HTTP controller)
-  and is the only layer that touches Rails.
+- `infrastructure` and the context controller implement/consume the ports
+  (ActiveRecord repository, HTTP controller) and are the only Rails-facing layers.
 
 ## CQRS
 
