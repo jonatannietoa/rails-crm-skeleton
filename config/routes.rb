@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   # Bounded-context routes are mounted per module. Controllers live under
   # app/modules/<context>/infrastructure/http and are referenced by their
   # full path (Rails maps "a/b/c#action" -> A::B::CController).
-  #
-  # The customers context is added by its own use-case commit.
+
+  # Customers context
+  post "/customers", to: "customers/infrastructure/http/customers#create"
+  get  "/customers/:id", to: "customers/infrastructure/http/customers#show"
 end
