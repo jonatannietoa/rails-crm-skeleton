@@ -15,10 +15,10 @@ app/
   modules/
     shared/                          # shared kernel used by every context
       domain/
-        aggregate_root.rb            # identity + equality for aggregates
-        domain_error.rb              # InvalidInput / BusinessRule / NotFound
-        clock.rb                     # time source port + System adapter
-        value_objects/email.rb
+        aggregate_root.rb            # Shared::AggregateRoot
+        domain_error.rb              # Shared::DomainError (+ one file per subclass)
+        clock.rb                     # Shared::Clock (port) + Clock::System adapter
+        value_objects/email.rb       # Shared::Email
     <context>/                       # one folder per bounded context
       domain/                        # aggregates, value objects, ports (pure Ruby)
         ports/                       # repository interfaces the domain depends on
@@ -39,9 +39,23 @@ generators and test helpers expect it there. Everything else about the context
 
 Both `app/controllers` and `app/modules` are autoload roots, and the folder path
 *is* the namespace. Zeitwerk **merges** the `<context>` namespace across roots, so
-`app/controllers/customers/customers_controller.rb` defines
-`Customers::CustomersController` and `app/modules/customers/domain/customer.rb`
-defines `Customers::Domain::Customer` — one `Customers::` namespace, two roots.
+`app/controllers/customers/customers_controller.rb` and
+`app/modules/customers/domain/customer.rb` both live under one `Customers::`.
+
+The **layer folders** inside a context (`domain`, `application`,
+`infrastructure` and their sub-folders) only organize files — they are
+`collapse`d in `config/application.rb` so they add no namespace segment, matching
+the NestJS layout where folders group but classes are flat. The result:
+
+| File | Constant |
+|------|----------|
+| `customers/domain/customer.rb` | `Customers::Customer` |
+| `customers/domain/value_objects/crm_metadata.rb` | `Customers::CRMMetadata` |
+| `customers/domain/ports/customer_repository.rb` | `Customers::CustomerRepository` |
+| `customers/application/commands/insert_customer_metadata.rb` | `Customers::InsertCustomerMetadata` (`::Command`, `::Handler`) |
+| `customers/application/queries/get_customer_by_id.rb` | `Customers::GetCustomerById` |
+| `customers/infrastructure/persistence/customer_record.rb` | `Customers::CustomerRecord` |
+| `shared/domain/value_objects/email.rb` | `Shared::Email` |
 
 ### The dependency rule
 

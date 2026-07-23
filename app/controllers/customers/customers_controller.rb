@@ -13,7 +13,7 @@ module Customers
     def create
       attrs = create_params
       view = Customers::Container.insert_customer_metadata.call(
-        Application::Commands::InsertCustomerMetadata::Command.new(
+        InsertCustomerMetadata::Command.new(
           name: attrs[:name],
           email: attrs[:email],
           metadata: metadata_attributes(attrs[:metadata]),
@@ -25,7 +25,7 @@ module Customers
     # GET /customers/:id
     def show
       view = Customers::Container.get_customer_by_id.call(
-        Application::Queries::GetCustomerById::Query.new(id: params[:id]),
+        GetCustomerById::Query.new(id: params[:id]),
       )
       render json: view.to_h
     end

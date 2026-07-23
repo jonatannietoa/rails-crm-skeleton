@@ -19,10 +19,25 @@ module RailsSkeleton
 
     config.time_zone = "UTC"
 
-    # Bounded contexts live under app/modules/<context> and are namespaced by
-    # folder (Zeitwerk): app/modules/customers/domain/customer.rb defines
-    # Customers::Domain::Customer. Direct children of app/ are autoload roots,
-    # so app/modules is a root and each first-level folder is a top namespace
-    # (Shared::, Customers::, ...). No extra autoload config is required.
+    # Bounded contexts live under app/modules/<context>. Direct children of app/
+    # are Zeitwerk autoload roots, so app/modules is a root and each first-level
+    # folder is a top namespace (Shared::, Customers::, ...).
+    #
+    # The layer folders inside a context (domain, application, infrastructure and
+    # their sub-folders) only ORGANIZE files — they do not add a namespace
+    # segment. This mirrors the NestJS layout, where folders group files but the
+    # classes are flat. We collapse them so, e.g.:
+    #   app/modules/customers/application/commands/insert_customer_metadata.rb
+    #     -> Customers::InsertCustomerMetadata
+    #   app/modules/shared/domain/value_objects/email.rb
+    #     -> Shared::Email
+    Rails.autoloaders.main.collapse(
+      Rails.root.join("app/modules/*/domain").to_s,
+      Rails.root.join("app/modules/*/domain/*").to_s,
+      Rails.root.join("app/modules/*/application").to_s,
+      Rails.root.join("app/modules/*/application/*").to_s,
+      Rails.root.join("app/modules/*/infrastructure").to_s,
+      Rails.root.join("app/modules/*/infrastructure/*").to_s,
+    )
   end
 end

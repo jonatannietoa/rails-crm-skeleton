@@ -6,22 +6,22 @@ module Customers
   class Container
     class << self
       def customer_repository
-        @customer_repository ||= Infrastructure::Persistence::ActiveRecordCustomerRepository.new
+        @customer_repository ||= ActiveRecordCustomerRepository.new
       end
 
       def clock
-        @clock ||= Shared::Domain::Clock::System.new
+        @clock ||= Shared::Clock::System.new
       end
 
       def insert_customer_metadata
-        Application::Commands::InsertCustomerMetadata::Handler.new(
+        InsertCustomerMetadata::Handler.new(
           customers: customer_repository,
           clock: clock,
         )
       end
 
       def get_customer_by_id
-        Application::Queries::GetCustomerById::Handler.new(customers: customer_repository)
+        GetCustomerById::Handler.new(customers: customer_repository)
       end
 
       # Test seam: swap adapters (e.g. an in-memory repository) and reset state.
