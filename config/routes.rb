@@ -1,9 +1,11 @@
 Rails.application.routes.draw do
   get "/health", to: "health#show"
 
-  # Bounded-context routes are mounted per module. Controllers live under
-  # app/modules/<context>/infrastructure/http and are referenced by their
-  # full path (Rails maps "a/b/c#action" -> A::B::CController).
-  #
-  # The customers context is added by its own use-case commit.
+  # Bounded-context controllers live in app/controllers/<context> (Rails
+  # convention). The rest of each context (domain/application/persistence)
+  # lives under app/modules/<context>; Zeitwerk merges the namespace.
+
+  # Customers context
+  post "/customers", to: "customers/customers#create"
+  get  "/customers/:id", to: "customers/customers#show"
 end

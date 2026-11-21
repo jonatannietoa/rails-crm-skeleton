@@ -2,9 +2,9 @@
 # command/query handlers are translated into HTTP responses, so controllers in
 # every bounded context stay thin and never rescue by themselves.
 class ApplicationController < ActionController::API
-  rescue_from Shared::Domain::InvalidInputError, with: :render_unprocessable
-  rescue_from Shared::Domain::BusinessRuleError, with: :render_conflict
-  rescue_from Shared::Domain::NotFoundError, with: :render_not_found
+  rescue_from Shared::InvalidInputError, with: :render_unprocessable
+  rescue_from Shared::BusinessRuleError, with: :render_conflict
+  rescue_from Shared::NotFoundError, with: :render_not_found
 
   private
 
